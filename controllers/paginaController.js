@@ -133,56 +133,56 @@ const editarViajes = async (req, res) => {
     }
     res.render("editar_viajes", {
         pagina: "Editar Viaje",
-        ...viaje.dataValues,
-        fecha_ida: moment(viaje.fecha_ida).format("YYYY-MM-DD"),
-        fecha_vuelta: moment(viaje.fecha_vuelta).format("YYYY-MM-DD"),
-        moment
+        ...viaje.dataValues, // con los ... pasamos un objeto con todas las propiedades de viaje
+        fecha_ida: moment(viaje.fecha_ida).format("YYYY-MM-DD"), //formateamos previamente la fecha para que se asigne al valor del formulario
+        fecha_vuelta: moment(viaje.fecha_vuelta).format("YYYY-MM-DD")
     });
 };
 
 const guardarEditarViajes = async (req, res) => {
-        const { id } = req.params;
-        const { titulo, precio, disponibles, fecha_ida, fecha_vuelta, imagen, slug, descripcion } = req.body;
-        const errores = [];
+    const { titulo, precio, disponibles, fecha_ida, fecha_vuelta, imagen, slug, descripcion } = req.body;
     
-        if (titulo.trim() === "") {
-            errores.push({ mensaje: "El título está vacío" });
-        }
-        if (precio.trim() === "") {
-            errores.push({ mensaje: "El precio está vacío" });
-        }
-        if (disponibles.trim() === "") {
-            errores.push({ mensaje: "El número de plazas disponibles está vacío" });
-        }
-        if (fecha_ida.trim() === "") {
-            errores.push({ mensaje: "La fecha de ida está vacía" });
-        }
-        if (fecha_vuelta.trim() === "") {
-            errores.push({ mensaje: "La fecha de vuelta está vacía" });
-        }
-        if (imagen.trim() === "") {
-            errores.push({ mensaje: "La imagen está vacía" });
-        }
-        if (slug.trim() === "") {
-            errores.push({ mensaje: "El slug está vacío" });
-        }
-        if (descripcion.trim() === "") {
-            errores.push({ mensaje: "La descripción está vacía" });
-        }
-    
-        const viaje = await Viaje.findOne({ where: { slug } });
+    //Comprobamos errores
+    const errores = [];
 
+    if (titulo.trim() === "") {
+        errores.push({ mensaje: "El título está vacío" });
+    }
+    if (precio.trim() === "") {
+        errores.push({ mensaje: "El precio está vacío" });
+    }
+    if (disponibles.trim() === "") {
+        errores.push({ mensaje: "El número de plazas disponibles está vacío" });
+    }
+    if (fecha_ida.trim() === "") {
+        errores.push({ mensaje: "La fecha de ida está vacía" });
+    }
+    if (fecha_vuelta.trim() === "") {
+        errores.push({ mensaje: "La fecha de vuelta está vacía" });
+    }
+    if (imagen.trim() === "") {
+        errores.push({ mensaje: "La imagen está vacía" });
+    }
+    if (slug.trim() === "") {
+        errores.push({ mensaje: "El slug está vacío" });
+    }
+    if (descripcion.trim() === "") {
+        errores.push({ mensaje: "La descripción está vacía" });
+    }
+    
     if (!viaje) return res.redirect("/viajes");
 
     if (errores.length > 0) {
         return res.render("editar_viajes", {
             pagina: "Editar Viaje",
-            errores,
-            moment,
+            errores : errores,
+            moment : moment,
             ...req.body
         });
     }
-
+  
+    const viaje = await Viaje.findOne({ where: { slug } });
+    
     try {
         await Viaje.update({
             titulo, precio, disponibles, fecha_ida, fecha_vuelta, imagen, descripcion
