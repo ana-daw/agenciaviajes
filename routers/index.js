@@ -1,5 +1,5 @@
 import express, {json} from 'express';
-import { paginaInicio, paginaNosotros , paginaViajes , paginaTestimonios , paginaDetalleViajes , GuardarTestimonios} from "../controllers/paginaController.js";
+import { paginaInicio, paginaNosotros , paginaViajes , paginaTestimonios , paginaDetalleViajes , GuardarTestimonios,editarViajes, guardarEditarViajes} from "../controllers/paginaController.js";
 
 const router = express.Router();
 
@@ -8,25 +8,12 @@ router.get("/nosotros", paginaNosotros);
 router.get("/viajes", paginaViajes);
 router.get("/testimonios", paginaTestimonios);
 router.get("/viajes/:slug", paginaDetalleViajes);
+router.get("/editar/:slug", editarViajes);
+router.get("/viajes/editar/:slug", editarViajes);
+router.post("/viajes/editar/:slug", guardarEditarViajes);
 
-router.get("/viajes/:slug", async (req, res) => {
-    try {
-        const { slug } = req.params;
-        const viaje = await Viaje.findOne({ where: { slug } });
 
-        if (!viaje) {
-            return res.redirect("/viajes");
-        }
 
-        res.render("viaje", {
-            titulo: viaje.titulo,
-            resultado: viaje
-        });
-    } catch (error) {
-        console.log(error);
-    }
-});
-
-router.post("/testimonios" , GuardarTestimonios)
+router.post("/testimonios" , GuardarTestimonios);
 
 export default router;

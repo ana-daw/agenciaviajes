@@ -28,4 +28,8 @@
                     |  #{viaje.disponibles} Disponibles
 
                     p=viaje.descripcion.substring(0,100)+'...'
-                    a(href=`viajes/${viaje.slug}`, class="btn btn-success btn-block") Más Información
+                    .row
+                        .col-6
+                            a(href=`/viajes/editar/${viaje.slug}`, class="btn btn-success btn-block") Editar Viaje
+                        .col-6
+                            a(href=`viajes/${viaje.slug}`, class="btn btn-success btn-block") Info

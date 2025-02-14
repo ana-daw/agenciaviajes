@@ -28,7 +28,7 @@ h3 {
     text-transform: uppercase;
     border-radius: .8rem;
 }
-.btn-success:hover {
+.btn-success:hover, .btn-success:focus, .btn-success:active {
     background-color: rgb(184, 5, 73);
     border-color: rgb(192, 7, 78);
 }

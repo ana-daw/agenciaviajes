@@ -41,3 +41,5 @@ app.listen(port, () => {
     console.log(`Servidor corriendo en el puerto: http://localhost:${port}`);
 });
 
+//"start": "index.js"
+// "dev": "nodemon index.js"

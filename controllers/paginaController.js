@@ -1,13 +1,13 @@
-import {Viaje} from "../models/Viaje.js";
+import { Viaje } from "../models/Viaje.js";
 import moment from "moment";
-import {Testimonial} from "../models/Testimoniales.js";
-import * as async_hooks from "node:async_hooks";
+import { Testimonial } from "../models/Testimoniales.js";
+
 
 const paginaInicio = async (req, res) => {
 
-    const promiseDB=[];
+    const promiseDB = [];
 
-    promiseDB.push(Viaje.findAll({limit: 3}));
+    promiseDB.push(Viaje.findAll({ limit: 3 }));
 
     promiseDB.push(Testimonial.findAll({
         limit: 3,
@@ -15,29 +15,29 @@ const paginaInicio = async (req, res) => {
     }));
 
     //Consultar 3 viajes del modelo de Viaje
-    try{
-     const resultado = await Promise.all(promiseDB);
+    try {
+        const resultado = await Promise.all(promiseDB);
 
 
-    res.render('inicio', {
-        titulo: 'Inicio',
-        clase: 'home',
-        viajes: resultado[0],
-        testimonios: resultado[1],
-        moment: moment,
-    });
+        res.render('inicio', {
+            titulo: 'Inicio',
+            clase: 'home',
+            viajes: resultado[0],
+            testimonios: resultado[1],
+            moment: moment,
+        });
 
-    }catch(err){
-      console.log(err);
+    } catch (err) {
+        console.log(err);
     }
 
 
 }
 
 const paginaNosotros = (req, res) => {
-    const titulo = "Sobre Nosotros";  
+    const titulo = "Sobre Nosotros";
     res.render('nosotros', {
-        titulo,  
+        titulo,
     });
 };
 
@@ -54,7 +54,7 @@ const paginaViajes = async (req, res) => {
 };
 
 const paginaTestimonios = async (req, res) => {
-    try{
+    try {
         const testimonios = await Testimonial.findAll({
             limit: 6,
             order: [["Id", "DESC"]],
@@ -64,7 +64,7 @@ const paginaTestimonios = async (req, res) => {
             testimonios: testimonios,
             moment: moment,
         });
-    }catch(err){
+    } catch (err) {
         console.log(err);
     }
 
@@ -72,52 +72,125 @@ const paginaTestimonios = async (req, res) => {
 }
 
 const paginaDetalleViajes = async (req, res) => {
-    const{slug} = req.params;
+    try {
+        const { slug } = req.params;
+        const viaje = await Viaje.findOne({ where: { slug } });
 
-    try{
-        const resultado = await Viaje.findOne({where:{slug:slug}});
+        if (!viaje) {
+            return res.redirect("/viajes");
+        }
 
-        res.render('viaje', {
-            titulo: "Informacion del Viaje",
-            resultado,
-            moment: moment,
+        res.render("viaje", {
+            titulo: viaje.titulo,
+            resultado: viaje,
+            moment: moment
         });
-
-    }catch(err){
-        console.log(err);
+    } catch (error) {
+        console.log(error);
     }
 };
 
-const GuardarTestimonios = async(req, res) => {
-    const {nombre, correo, mensaje}= req.body;
+const GuardarTestimonios = async (req, res) => {
+    const { nombre, correo, mensaje } = req.body;
     const errores = [];
 
-    if (nombre.trim() ===""){
-        errores.push({mensaje:"el nombre está vacío"});
+    if (nombre.trim() === "") {
+        errores.push({ mensaje: "el nombre está vacío" });
     }
-    if (correo.trim() ===""){
-        errores.push({mensaje:"el correo está vacío"});
+    if (correo.trim() === "") {
+        errores.push({ mensaje: "el correo está vacío" });
     }
-    if (mensaje.trim() ===""){
-        errores.push({mensaje:"el mensaje está vacío"});
+    if (mensaje.trim() === "") {
+        errores.push({ mensaje: "el mensaje está vacío" });
     }
 
-    if (errores.length > 0){
+    if (errores.length > 0) {
         res.render('testimonios', {
             titulo: 'Testimonios',
-            errores:errores,
+            errores: errores,
             nombre,
             correo,
-            mensaje:mensaje,
+            mensaje: mensaje,
         });
-    }else{
-        try{
+    } else {
+        try {
 
-            await Testimonial.create({nombre: nombre, correoelectronico: correo,mensaje: mensaje,});
+            await Testimonial.create({ nombre: nombre, correoelectronico: correo, mensaje: mensaje, });
             res.redirect('/testimonios'); //Guardo en la base de datos y lo envío a la misma vista
-        }catch(error){
+        } catch (error) {
             console.log(error);
         }
+    }
+
+};
+
+
+const editarViajes = async (req, res) => {
+    const { slug } = req.params;
+    const viaje = await Viaje.findOne({ where: { slug } });
+    if (!viaje) {
+        return res.redirect("/viajes");
+    }
+    res.render("editar_viajes", {
+        pagina: "Editar Viaje",
+        ...viaje.dataValues,
+        fecha_ida: moment(viaje.fecha_ida).format("YYYY-MM-DD"),
+        fecha_vuelta: moment(viaje.fecha_vuelta).format("YYYY-MM-DD"),
+        moment
+    });
+};
+
+const guardarEditarViajes = async (req, res) => {
+        const { id } = req.params;
+        const { titulo, precio, disponibles, fecha_ida, fecha_vuelta, imagen, slug, descripcion } = req.body;
+        const errores = [];
+    
+        if (titulo.trim() === "") {
+            errores.push({ mensaje: "El título está vacío" });
+        }
+        if (precio.trim() === "") {
+            errores.push({ mensaje: "El precio está vacío" });
+        }
+        if (disponibles.trim() === "") {
+            errores.push({ mensaje: "El número de plazas disponibles está vacío" });
+        }
+        if (fecha_ida.trim() === "") {
+            errores.push({ mensaje: "La fecha de ida está vacía" });
+        }
+        if (fecha_vuelta.trim() === "") {
+            errores.push({ mensaje: "La fecha de vuelta está vacía" });
+        }
+        if (imagen.trim() === "") {
+            errores.push({ mensaje: "La imagen está vacía" });
+        }
+        if (slug.trim() === "") {
+            errores.push({ mensaje: "El slug está vacío" });
+        }
+        if (descripcion.trim() === "") {
+            errores.push({ mensaje: "La descripción está vacía" });
+        }
+    
+        const viaje = await Viaje.findOne({ where: { slug } });
+
+    if (!viaje) return res.redirect("/viajes");
+
+    if (errores.length > 0) {
+        return res.render("editar_viajes", {
+            pagina: "Editar Viaje",
+            errores,
+            moment,
+            ...req.body
+        });
+    }
+
+    try {
+        await Viaje.update({
+            titulo, precio, disponibles, fecha_ida, fecha_vuelta, imagen, descripcion
+        }, { where: { id: viaje.id } });
+
+        res.redirect("/viajes");
+    } catch (error) {
+        console.log(error);
     }
 };
 
@@ -127,5 +200,7 @@ export {
     paginaViajes,
     paginaTestimonios,
     paginaDetalleViajes,
-    GuardarTestimonios
-}
+    GuardarTestimonios,
+    editarViajes,
+    guardarEditarViajes
+};  
