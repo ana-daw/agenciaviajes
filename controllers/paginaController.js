@@ -140,9 +140,10 @@ const editarViajes = async (req, res) => {
 };
 
 const guardarEditarViajes = async (req, res) => {
-    const { titulo, precio, disponibles, fecha_ida, fecha_vuelta, imagen, slug, descripcion } = req.body;
+    const { slug } = req.params;
+    const { titulo, precio, disponibles, fecha_ida, fecha_vuelta, imagen, descripcion } = req.body;
     
-    //Comprobamos errores
+    // Comprobamos errores
     const errores = [];
 
     if (titulo.trim() === "") {
@@ -169,21 +170,23 @@ const guardarEditarViajes = async (req, res) => {
     if (descripcion.trim() === "") {
         errores.push({ mensaje: "La descripción está vacía" });
     }
-    
-    if (!viaje) return res.redirect("/viajes");
 
     if (errores.length > 0) {
         return res.render("editar_viajes", {
             pagina: "Editar Viaje",
-            errores : errores,
-            moment : moment,
+            errores,
+            moment,
             ...req.body
         });
     }
-  
-    const viaje = await Viaje.findOne({ where: { slug } });
-    
+
     try {
+        const viaje = await Viaje.findOne({ where: { slug } });
+
+        if (!viaje) {
+            return res.redirect("/viajes");
+        }
+
         await Viaje.update({
             titulo, precio, disponibles, fecha_ida, fecha_vuelta, imagen, descripcion
         }, { where: { id: viaje.id } });
